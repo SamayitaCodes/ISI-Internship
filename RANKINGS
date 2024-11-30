@@ -4,21 +4,22 @@ import java.util.List;
 
 class Company {
     private String name;
-    private Environment environment;
-    private Social social;
-    private Governance governance;
+    private EnvironmentalImpact environmentalImpact;
+    private SocialImpact socialImpact;
+    private CorporateGovernance corporateGovernance;
 
-    public Company(String name, Environment environment, Social social, Governance governance) {
+    public Company(String name, EnvironmentalImpact environmentalImpact, SocialImpact socialImpact, CorporateGovernance corporateGovernance) {
         this.name = name;
-        this.environment = environment;
-        this.social = social;
-        this.governance = governance;
+        this.environmentalImpact = environmentalImpact;
+        this.socialImpact = socialImpact;
+        this.corporateGovernance = corporateGovernance;
     }
 
-    public double calculateESGScore() {
-        double totalScore = environment.calculateScore() + social.calculateScore() + governance.calculateScore();
-        double maxScore = Environment.MAX_SCORE + Social.MAX_SCORE + Governance.MAX_SCORE;
-        return (totalScore / maxScore) * 100;  
+    public double calculateOverallESGScore() {
+        double totalScore = environmentalImpact.calculateScore() +
+                            socialImpact.calculateScore() +
+                            corporateGovernance.calculateScore();
+        return totalScore / 3; // Average ESG score
     }
 
     public String getName() {
@@ -26,63 +27,63 @@ class Company {
     }
 }
 
-class Environment {
-    private double ghgEmissions;    
-    private double energyConsumption;
-    private double renewableGeneration;
-    public static final double MAX_SCORE = 30;
+class EnvironmentalImpact {
+    private double carbonFootprint; // in tons per year
+    private double waterUsage;      // in liters per year
+    private double renewableEnergy; // percentage of energy from renewable sources
+    private static final double MAX_SCORE = 100;
 
-    public Environment(double ghgEmissions, double energyConsumption, double renewableGeneration) {
-        this.ghgEmissions = ghgEmissions;
-        this.energyConsumption = energyConsumption;
-        this.renewableGeneration = renewableGeneration;
+    public EnvironmentalImpact(double carbonFootprint, double waterUsage, double renewableEnergy) {
+        this.carbonFootprint = carbonFootprint;
+        this.waterUsage = waterUsage;
+        this.renewableEnergy = renewableEnergy;
     }
 
     public double calculateScore() {
-        double emissionScore = Math.max(0, 10 - ghgEmissions);  
-        double energyScore = Math.max(0, 10 - (energyConsumption / 10000));  
-        double renewableScore = Math.min(renewableGeneration * 2, 10);  
-        return emissionScore + energyScore + renewableScore;
+        double carbonScore = Math.max(0, 30 - carbonFootprint / 1000); // Lower footprint, higher score
+        double waterScore = Math.max(0, 30 - waterUsage / 1000000);    // Lower usage, higher score
+        double renewableScore = Math.min(renewableEnergy, 40);         // Cap at 40 points
+        return carbonScore + waterScore + renewableScore;
     }
 }
 
-class Social {
-    private double trainingHours;  
-    private double csrSpend;        
-    private double ltifr;          
-    public static final double MAX_SCORE = 30;
+class SocialImpact {
+    private double employeeSatisfaction; // Score out of 10
+    private double communityInvestment;  // in million dollars
+    private double diversityIndex;       // percentage of diverse employees
+    private static final double MAX_SCORE = 100;
 
-    public Social(double trainingHours, double csrSpend, double ltifr) {
-        this.trainingHours = trainingHours;
-        this.csrSpend = csrSpend;
-        this.ltifr = ltifr;
+    public SocialImpact(double employeeSatisfaction, double communityInvestment, double diversityIndex) {
+        this.employeeSatisfaction = employeeSatisfaction;
+        this.communityInvestment = communityInvestment;
+        this.diversityIndex = diversityIndex;
     }
 
     public double calculateScore() {
-        double trainingScore = Math.min(trainingHours / 10, 10);  
-        double csrScore = Math.min(csrSpend / 10, 10);  
-        double safetyScore = Math.max(0, 10 - ltifr * 10);  
-        return trainingScore + csrScore + safetyScore;
+        double satisfactionScore = employeeSatisfaction * 10;               // Scaled to 100
+        double investmentScore = Math.min(communityInvestment * 5, 40);     // Cap at 40 points
+        double diversityScore = Math.min(diversityIndex, 50);               // Cap at 50 points
+        return satisfactionScore + investmentScore + diversityScore;
     }
 }
 
-class Governance {
-    private double revenue;          
-    private double profit;          
-    private int grievancesReported;  
-    public static final double MAX_SCORE = 30;
+class CorporateGovernance {
+    private double transparencyIndex;   // Score out of 10
+    private int reportedIssues;         // Number of reported governance issues
+    private double financialStability;  // Score out of 10
+    private static final double MAX_SCORE = 100;
 
-    public Governance(double revenue, double profit, int grievancesReported) {
-        this.revenue = revenue;
-        this.profit = profit;
-        this.grievancesReported = grievancesReported;
+    public CorporateGovernance(double transparencyIndex, int reportedIssues, double financialStability) {
+        this.transparencyIndex = transparencyIndex;
+        this.reportedIssues = reportedIssues;
+        this.financialStability = financialStability;
     }
 
     public double calculateScore() {
-        double revenueScore = Math.min(revenue / 10000, 10);  
-        double profitScore = Math.min(profit / 1000, 10);  
-        double grievanceScore = Math.max(0, 10 - grievancesReported * 0.1);  
-        return revenueScore + profitScore + grievanceScore;
+        double transparencyScore = transparencyIndex * 10;                   // Scaled to 100
+        double issuesScore = Math.max(0, 30 - reportedIssues * 0.5);         // Penalty for issues
+        double stabilityScore = financialStability * 6;                     // Scaled to 60
+        return transparencyScore + issuesScore + stabilityScore;
     }
 }
 
@@ -90,39 +91,35 @@ public class ESGRanking {
     public static void main(String[] args) {
         List<Company> companies = new ArrayList<>();
 
-       
-        companies.add(new Company("TCS",
-                new Environment(0.2643, 273543.33, 0.6),
-                new Social(80.86, 728, 0.24),
-                new Governance(709570, 377713.3, 0)));
-       
-        companies.add(new Company("Wipro",
-                new Environment(0.505, 700965.79, 0.766),
-                new Social(45.86, 229.4, 228894),
-                new Governance(772679.33, 127305, 478)));
+        // Adding new company data
+        companies.add(new Company("GreenTech",
+                new EnvironmentalImpact(500, 200000, 80),
+                new SocialImpact(8.5, 15, 45),
+                new CorporateGovernance(9, 2, 9.5)));
 
-        companies.add(new Company("Reliance Industries",
-                new Environment(223.66, 496070000, 0.19),
-                new Social(19.4, 1082.33, 0.063),
-                new Governance(1988228, 370514, 17)));
+        companies.add(new Company("FutureCorp",
+                new EnvironmentalImpact(800, 500000, 65),
+                new SocialImpact(7.0, 20, 50),
+                new CorporateGovernance(8, 5, 8.0)));
 
-        companies.add(new Company("Ernst & Young",
-                new Environment(1.11, 1150, 5.53),
-                new Social(32, 336.6, 0.7),
-                new Governance(4143.28, 33753.3, 850)));
+        companies.add(new Company("EcoSolutions",
+                new EnvironmentalImpact(300, 150000, 90),
+                new SocialImpact(9.0, 10, 40),
+                new CorporateGovernance(9.5, 1, 9.0)));
 
-        companies.add(new Company("Vodafone Idea",
-                new Environment(10.55, 25590, 0.25),
-                new Social(8.1, 153, 0.36),
-                new Governance(43478.37, -34604.66, 166070)));
+        companies.add(new Company("SustainableWorks",
+                new EnvironmentalImpact(1000, 700000, 50),
+                new SocialImpact(6.5, 25, 60),
+                new CorporateGovernance(7.5, 8, 7.0)));
 
-       
-        companies.sort(Comparator.comparingDouble(Company::calculateESGScore).reversed());
+        // Sort companies by ESG score in descending order
+        companies.sort(Comparator.comparingDouble(Company::calculateOverallESGScore).reversed());
 
-       
-        System.out.println("Company Rankings based on ESG Score:");
+        // Display rankings
+        System.out.println("Company Rankings Based on ESG Score:");
         for (int i = 0; i < companies.size(); i++) {
-            System.out.printf("%d. %s - ESG Score: %.2f\n", i + 1, companies.get(i).getName(), companies.get(i).calculateESGScore());
+            System.out.printf("%d. %s - ESG Score: %.2f\n",
+                    i + 1, companies.get(i).getName(), companies.get(i).calculateOverallESGScore());
         }
     }
 }
